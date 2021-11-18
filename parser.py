@@ -3,7 +3,7 @@ import string
 from lexer import tokens, lexer, is_ID
 
 ##########Pour personaliser les messages d'erreur du parser ###########
-CBLUE   = '\33[34m'
+CBLUE = '\33[34m'
 CRED = '\033[91m'
 CEND = '\033[0m'
 BOLD = '\033[1m'
@@ -14,6 +14,7 @@ UNDERLINE = '\033[4m'
 ################## Sym Table #####################################
 ##################################################################
 CURR_SCOPE = 0
+
 
 class SymTab:
 
@@ -30,7 +31,7 @@ class SymTab:
 
     def push_scope(self):
         # pousser un nouveau dictionnaire dans la pile - la pile s'agrandit vers la gauche
-        self.scoped_symtab.insert(CURR_SCOPE,{})
+        self.scoped_symtab.insert(CURR_SCOPE, {})
 
     def pop_scope(self):
         # faire sortir le dictionnaire le plus à gauche de la pile
@@ -48,7 +49,7 @@ class SymTab:
             raise ValueError("symbol {} already declared".format(sym))
 
         # enter the symbol in the current scope
-        self.scoped_symtab[CURR_SCOPE].update({sym:('scalar', init)})
+        self.scoped_symtab[CURR_SCOPE].update({sym: ('scalar', init)})
 
     def declare_fun(self, sym, init):
         # declare a function in the current scope: dict @ position 0
@@ -59,7 +60,7 @@ class SymTab:
             raise ValueError("symbol {} already declared".format(sym))
 
         # enter the function in the current scope
-        self.scoped_symtab[CURR_SCOPE].update({sym:('function', init)})
+        self.scoped_symtab[CURR_SCOPE].update({sym: ('function', init)})
 
     def lookup_sym(self, sym):
         # find the first occurence of sym in the symtab stack
@@ -94,6 +95,7 @@ class SymTab:
 ############################# STATE ##########################################
 ##############################################################################
 
+
 class State:
     def __init__(self):
         self.initialize()
@@ -105,6 +107,7 @@ class State:
         # when done parsing this variable will hold our AST
         self.AST = None
 
+
 state = State()
 
 
@@ -115,18 +118,20 @@ state = State()
 # NOTE: all operators need to have tokens
 #       so that we can put them into the precedence table
 precedence = (
-              ('left', 'EQ', 'NE'),
-              ('left', 'LT' , 'BT'),
-              ('left', 'LE', 'BE'),
-              ('left', 'PLUS', 'MINUS'),
-              ('left', 'EUCLID'),
-              ('left', 'TIMES', 'DIVIDE'),
-              ('right', 'UMINUS')
-             )
+    ('left', 'EQ', 'NE'),
+    ('left', 'LT', 'BT'),
+    ('left', 'LE', 'BE'),
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'EUCLID'),
+    ('left', 'TIMES', 'DIVIDE'),
+    ('right', 'UMINUS')
+)
 
 #########################################################################
 # règles de grammaire avec actions intégrées
 #########################################################################
+
+
 def p_prog(p):
     '''
     program : stmt_list
@@ -134,6 +139,8 @@ def p_prog(p):
     state.AST = p[1]
 
 #########################################################################
+
+
 def p_stmt_list(p):
     '''
     stmt_list : stmt stmt_list
@@ -145,6 +152,8 @@ def p_stmt_list(p):
         p[0] = p[1]
 
 #########################################################################
+
+
 def p_stmt(p):
     '''
     stmt : sjel_3andk ID '(' opt_formal_args ')' stmt
@@ -180,15 +189,17 @@ def p_stmt(p):
     elif p[1] == 'i4a':
         p[0] = ('i4a', p[3], p[5], p[6])
     elif p[1] == 'men':
-        p[0]  = ('men',p[3],p[6],p[8])
+        p[0] = ('men', p[3], p[6], p[8])
     elif p[1] == 'kteb':
-        p[0] = ('kteb',p[3])
+        p[0] = ('kteb', p[3])
     elif p[1] == '{':
         p[0] = ('block', p[2])
     else:
         raise ValueError("unexpected symbol {}".format(p[1]))
 
 #########################################################################
+
+
 def p_opt_formal_args(p):
     '''
     opt_formal_args : formal_args
@@ -197,6 +208,8 @@ def p_opt_formal_args(p):
     p[0] = p[1]
 
 #########################################################################
+
+
 def p_formal_args(p):
     '''
     formal_args : ID ',' formal_args
@@ -208,6 +221,8 @@ def p_formal_args(p):
         p[0] = ('seq', ('id', p[1]), ('nil',))
 
 #########################################################################
+
+
 def p_opt_init(p):
     '''
     opt_init : '=' exp
@@ -219,6 +234,8 @@ def p_opt_init(p):
         p[0] = p[1]
 
 #########################################################################
+
+
 def p_opt_actual_args(p):
     '''
     opt_actual_args : actual_args
@@ -227,6 +244,8 @@ def p_opt_actual_args(p):
     p[0] = p[1]
 
 #########################################################################
+
+
 def p_actual_args(p):
     '''
     actual_args : exp ',' actual_args
@@ -238,6 +257,8 @@ def p_actual_args(p):
         p[0] = ('seq', p[1], ('nil',))
 
 #########################################################################
+
+
 def p_opt_exp(p):
     '''
     opt_exp : exp
@@ -246,6 +267,8 @@ def p_opt_exp(p):
     p[0] = p[1]
 
 #########################################################################
+
+
 def p_opt_else(p):
     '''
     opt_else : mn_ghir stmt
@@ -257,6 +280,8 @@ def p_opt_else(p):
         p[0] = p[1]
 
 #########################################################################
+
+
 def p_binop_exp(p):
     '''
     exp : exp PLUS exp
@@ -292,6 +317,8 @@ def p_double_exp(p):
     p[0] = ('double', float(p[1]))
 
 #########################################################################
+
+
 def p_integer_exp(p):
     '''
     exp : INTEGER
@@ -299,12 +326,13 @@ def p_integer_exp(p):
     p[0] = ('integer', int(p[1]))
 
 #########################################################################
+
+
 def p_id_exp(p):
     '''
     exp : ID
     '''
     p[0] = ('id', p[1])
-
 
 
 #########################################################################
@@ -315,6 +343,8 @@ def p_call_exp(p):
     p[0] = ('callexp', p[1], p[3])
 
 #########################################################################
+
+
 def p_paren_exp(p):
     '''
     exp : '(' exp ')'
@@ -322,6 +352,8 @@ def p_paren_exp(p):
     p[0] = ('paren', p[2])
 
 #########################################################################
+
+
 def p_uminus_exp(p):
     '''
     exp : MINUS exp %prec UMINUS
@@ -338,6 +370,8 @@ def p_opt_semi(p):
     pass
 
 #########################################################################
+
+
 def p_empty(p):
     '''
     empty :
@@ -345,6 +379,8 @@ def p_empty(p):
     p[0] = ('nil',)
 
 #########################################################################
+
+
 def p_error(p):
     if p == None:
         token = "end of file"
@@ -353,10 +389,11 @@ def p_error(p):
 
     print(f" {CRED}  {BOLD}  3andak mouchkil v lparser {CEND}: na9sak chi 7aja 9bel wla mn wra  {CBLUE} {token} {CEND}")
 
+
 #########################################################################
 # construction du  parser
 #########################################################################
-parser = yacc.yacc(debug=False,tabmodule='DARIJASCRIPTparsetab')
+parser = yacc.yacc(debug=False, tabmodule='DARIJASCRIPTparsetab')
 
 
 ###########################################################################
@@ -377,6 +414,8 @@ class ReturnValue(Exception):
         return(repr(self.value))
 
 #########################################################################
+
+
 def len_seq(seq_list):
 
     if seq_list[0] == 'nil':
@@ -389,9 +428,11 @@ def len_seq(seq_list):
         return 1 + len_seq(p2)
 
     else:
-            raise ValueError("unknown node type: {}".format(seq_list[0]))
+        raise ValueError("unknown node type: {}".format(seq_list[0]))
 
 #########################################################################
+
+
 def eval_actual_args(args):
 
     if args[0] == 'nil':
@@ -409,6 +450,8 @@ def eval_actual_args(args):
         raise ValueError("unknown node type: {}".format(args[0]))
 
 #########################################################################
+
+
 def declare_formal_args(formal_args, actual_val_args):
 
     if len_seq(actual_val_args) != len_seq(formal_args):
@@ -427,6 +470,8 @@ def declare_formal_args(formal_args, actual_val_args):
     declare_formal_args(p1, p2)
 
 #########################################################################
+
+
 def handle_call(name, actual_arglist):
 
     (type, val) = state.symbol_table.lookup_sym(name)
@@ -438,14 +483,18 @@ def handle_call(name, actual_arglist):
     (FUNVAL, formal_arglist, body, context) = val
 
     if len_seq(formal_arglist) != len_seq(actual_arglist):
-        raise ValueError("function {} expects {} arguments".format( context , len_seq(formal_arglist)))
+        raise ValueError("function {} expects {} arguments".format(
+            context, len_seq(formal_arglist)))
 
     # configurer l'environnement pour la portée statique puis exécuter la fonction
-    actual_val_args = eval_actual_args(actual_arglist)   # evaluate actuals in current symtab
+    # evaluate actuals in current symtab
+    actual_val_args = eval_actual_args(actual_arglist)
     save_symtab = state.symbol_table.get_config()        # save current symtab
-    state.symbol_table.set_config(context)               # make function context current symtab
+    # make function context current symtab
+    state.symbol_table.set_config(context)
     state.symbol_table.push_scope()                      # push new function scope
-    declare_formal_args(formal_arglist, actual_val_args) # declare formals in function scope
+    # declare formals in function scope
+    declare_formal_args(formal_arglist, actual_val_args)
 
     return_value = None
     try:
@@ -455,13 +504,16 @@ def handle_call(name, actual_arglist):
 
     # NOTE: popping the function scope is not necessary because we
     # are restoring the original symtab configuration
-    state.symbol_table.set_config(save_symtab)           # restore original symtab config
+    # restore original symtab config
+    state.symbol_table.set_config(save_symtab)
 
     return return_value
 
 #########################################################################
 # node functions
 #########################################################################
+
+
 def seq(node):
 
     (SEQ, stmt, stmt_list) = node
@@ -470,6 +522,8 @@ def seq(node):
     walk(stmt_list)
 
 #########################################################################
+
+
 def nil(node):
 
     (NIL,) = node
@@ -478,19 +532,21 @@ def nil(node):
     pass
 
 #########################################################################
+
+
 def fundecl_stmt(node):
 
-    try: # try the fundecl pattern without arglist
+    try:  # try the fundecl pattern without arglist
         (FUNDECL, name, (NIL,), body) = node
 
-    except ValueError: # try fundecl with arglist
+    except ValueError:  # try fundecl with arglist
         (FUNDECL, name, arglist, body) = node
 
         context = state.symbol_table.get_config()
         funval = ('funval', arglist, body, context)
         state.symbol_table.declare_fun(name, funval)
 
-    else: # fundecl pattern matched
+    else:  # fundecl pattern matched
         # no arglist is present
         context = state.symbol_table.get_config()
         funval = ('funval', ('nil',), body, context)
@@ -500,20 +556,22 @@ def fundecl_stmt(node):
 #########################################################################
 def sjel_3andk_stmt(node):
 
-    try: # try the declare pattern without initializer
+    try:  # try the declare pattern without initializer
         (sjel_3andk, name, (NIL,)) = node
 
-    except ValueError: # try declare with initializer
+    except ValueError:  # try declare with initializer
         (sjel_3andk, name, init_val) = node
 
         value = walk(init_val)
         state.symbol_table.declare_scalar(name, value)
 
-    else: # declare pattern matched
+    else:  # declare pattern matched
         # when no initializer is present we init with the value 0
         state.symbol_table.declare_scalar(name, 0)
 
 #########################################################################
+
+
 def assign_stmt(node):
 
     (ASSIGN, name, exp) = node
@@ -522,6 +580,8 @@ def assign_stmt(node):
     state.symbol_table.update_sym(name, ('scalar', value))
 
 #########################################################################
+
+
 def khod_stmt(node):
 
     (khod, name) = node
@@ -534,11 +594,14 @@ def khod_stmt(node):
         try:
             value = str(s)
         except ValueError:
-            raise ValueError("expected an integer or string or float  value for " + name)
+            raise ValueError(
+                "expected an integer or string or float  value for " + name)
 
     state.symbol_table.update_sym(name, ('scalar', value))
 
 #########################################################################
+
+
 def byen_liya_stmt(node):
 
     (PUT, exp) = node
@@ -547,6 +610,8 @@ def byen_liya_stmt(node):
     print("> {}".format(value))
 
 #########################################################################
+
+
 def call_stmt(node):
 
     (CALLSTMT, name, actual_args) = node
@@ -554,22 +619,26 @@ def call_stmt(node):
     handle_call(name, actual_args)
 
 #########################################################################
+
+
 def raja3_stmt(node):
     # si une valeur de retour existe le return stmt will l'enregistrera dans state object
 
-    try: # try return without exp
+    try:  # try return without exp
         (RETURN, (NIL,)) = node
 
-    except ValueError: # return with exp
+    except ValueError:  # return with exp
         (RETURN, exp) = node
 
         value = walk(exp)
         raise ReturnValue(value)
 
-    else: # return without exp
+    else:  # return without exp
         raise ReturnValue(None)
 
 #########################################################################
+
+
 def kteb_stmt(node):
 
     (kteb, exp) = node
@@ -590,9 +659,11 @@ def ma7ad_stmt(node):
         value = walk(cond)
 
 ########################################################################
+
+
 def for_stmt(node):
 
-    (FOR, var_ini,var_fin, body )  = node
+    (FOR, var_ini, var_fin, body) = node
 
     value = walk(var_ini)
     val_fin = walk(var_fin)
@@ -602,12 +673,14 @@ def for_stmt(node):
         value += 1
 
 #########################################################################
+
+
 def i4a_stmt(node):
 
-    try: # try the if-then pattern
+    try:  # try the if-then pattern
         (i4a, cond, then_stmt, (NIL,)) = node
 
-    except ValueError: # if-then pattern didn't match
+    except ValueError:  # if-then pattern didn't match
         (IF, cond, then_stmt, else_stmt) = node
 
         value = walk(cond)
@@ -617,12 +690,14 @@ def i4a_stmt(node):
         else:
             walk(else_stmt)
 
-    else: # if-then pattern matched
+    else:  # if-then pattern matched
         value = walk(cond)
         if value != 0:
             walk(then_stmt)
 
 #########################################################################
+
+
 def block_stmt(node):
 
     (BLOCK, stmt_list) = node
@@ -631,6 +706,8 @@ def block_stmt(node):
     walk(stmt_list)
     state.symbol_table.pop_scope()
 ###########################################################################
+
+
 def and_exp(node):
     (w, c1, c2) = node
 
@@ -639,6 +716,7 @@ def and_exp(node):
     return 1 if v1 and v2 else 0
 
 ##############################################################
+
 
 def or_exp(node):
     (wla, c1, c2) = node
@@ -649,25 +727,29 @@ def or_exp(node):
     return 1 if v1 or v2 else 0
 
 #########################################################################
+
+
 def plus_exp(node):
 
-    (PLUS,c1,c2) = node
+    (PLUS, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
-    if isinstance(v1,int) and isinstance(v2,str):
+    if isinstance(v1, int) and isinstance(v2, str):
         v_1 = str(v1)
         return v_1 + v2
-    elif isinstance(v2,int) and isinstance(v1, str):
+    elif isinstance(v2, int) and isinstance(v1, str):
         v_2 = str(v2)
         return v1 + v_2
     else:
         return v1 + v2
 
 #########################################################################
+
+
 def minus_exp(node):
 
-    (MINUS,c1,c2) = node
+    (MINUS, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -675,9 +757,11 @@ def minus_exp(node):
     return v1 - v2
 
 #########################################################################
+
+
 def times_exp(node):
 
-    (TIMES,c1,c2) = node
+    (TIMES, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -685,18 +769,22 @@ def times_exp(node):
     return v1 * v2
 
 #########################################################################
+
+
 def divide_exp(node):
 
-    (DIVIDE,c1,c2) = node
+    (DIVIDE, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
 
     return v1 // v2
 #########################################################################
+
+
 def euclid_exp(node):
 
-    (EUCLID,c1,c2) = node
+    (EUCLID, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -704,9 +792,11 @@ def euclid_exp(node):
     return 1 if v1 % v2 else 0
 
 #########################################################################
+
+
 def eq_exp(node):
 
-    (EQ,c1,c2) = node
+    (EQ, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -714,18 +804,22 @@ def eq_exp(node):
     return 1 if v1 == v2 else 0
 
 #########################################################################
+
+
 def ne_exp(node):
 
-    (NE,c1,c2) = node
+    (NE, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
 
     return 1 if v1 != v2 else 0
 #########################################################################
+
+
 def le_exp(node):
 
-    (LE,c1,c2) = node
+    (LE, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -733,9 +827,11 @@ def le_exp(node):
     return 1 if v1 <= v2 else 0
 
 #########################################################################
+
+
 def be_exp(node):
 
-    (BE,c1,c2) = node
+    (BE, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -743,9 +839,11 @@ def be_exp(node):
     return 1 if v1 >= v2 else 0
 
 #########################################################################
+
+
 def bt_exp(node):
 
-    (BT,c1,c2) = node
+    (BT, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -753,9 +851,11 @@ def bt_exp(node):
     return 1 if v1 > v2 else 0
 
 #########################################################################
+
+
 def lt_exp(node):
 
-    (LT,c1,c2) = node
+    (LT, c1, c2) = node
 
     v1 = walk(c1)
     v2 = walk(c2)
@@ -763,15 +863,19 @@ def lt_exp(node):
     return 1 if v1 < v2 else 0
 
 #########################################################################
+
+
 def string_exp(node):
 
     (STRING, value) = node
 
-#pour se deperaser de '' dans les chaines de caracteres
+# pour se deperaser de '' dans les chaines de caracteres
 
     new_string = str(value)
     return new_string.replace("'", " ")
 #########################################################################
+
+
 def integer_exp(node):
 
     (INTEGER, value) = node
@@ -779,17 +883,19 @@ def integer_exp(node):
     return value
 
 #########################################################################
+
+
 def double_exp(node):
 
     (INTEGER, value) = node
 
-
     return value
 #########################################################################
+
+
 def id_exp(node):
 
     (ID, name) = node
-
 
     (type, val) = state.symbol_table.lookup_sym(name)
 
@@ -799,6 +905,8 @@ def id_exp(node):
     return val
 
 #########################################################################
+
+
 def call_exp(node):
     # call_exp fonctionne comme call_stmt à l'exception  que nous devons renvoyer une valeur de retour
 
@@ -812,6 +920,8 @@ def call_exp(node):
     return return_value
 
 #########################################################################
+
+
 def uminus_exp(node):
 
     (UMINUS, exp) = node
@@ -831,6 +941,8 @@ def paren_exp(node):
 #########################################################################
 # walk
 #########################################################################
+
+
 def walk(node):
     # node format: (TYPE, [child1[, child2[, ...]]])
     type = node[0]
@@ -841,45 +953,47 @@ def walk(node):
     else:
         raise ValueError("walk: unknown tree node type: " + type)
 
-# un dictionnaire pour associer les noeuds de l'arbre avec les functions 
+
+# un dictionnaire pour associer les noeuds de l'arbre avec les functions
 dispatch_dict = {
-    'seq'     : seq,
-    'nil'     : nil,
-    'fundecl' : fundecl_stmt,
-    'sjel_3andk' : sjel_3andk_stmt,
-    'assign'  : assign_stmt,
-    'khod'     : khod_stmt,
-    'byen_liya'     : byen_liya_stmt,
+    'seq': seq,
+    'nil': nil,
+    'fundecl': fundecl_stmt,
+    'sjel_3andk': sjel_3andk_stmt,
+    'assign': assign_stmt,
+    'khod': khod_stmt,
+    'byen_liya': byen_liya_stmt,
     'callstmt': call_stmt,
-    'raja3'  : raja3_stmt,
-    'ma7ad'   : ma7ad_stmt,
-    'i4a'      : i4a_stmt,
-    'kteb' : kteb_stmt,
-    'men' : for_stmt,
-    'block'   : block_stmt,
+    'raja3': raja3_stmt,
+    'ma7ad': ma7ad_stmt,
+    'i4a': i4a_stmt,
+    'kteb': kteb_stmt,
+    'men': for_stmt,
+    'block': block_stmt,
     'string': string_exp,
-    'integer' : integer_exp,
-    'double' : double_exp ,
-    'id'      : id_exp,
-    'callexp' : call_exp,
-    'paren'   : paren_exp,
-    '+'       : plus_exp,
-    '-'       : minus_exp,
-    '*'       : times_exp,
-    '/'       : divide_exp,
-    '%'       : euclid_exp,
-    '=='      : eq_exp,
-    '<='      : le_exp,
-    '>='      : be_exp,
-    '>'       : bt_exp,
-    '<'       : lt_exp,
-    'ne'      : ne_exp,
-    'and'     : and_exp,
-    'or'      : or_exp ,
-    'uminus'  : uminus_exp
+    'integer': integer_exp,
+    'double': double_exp,
+    'id': id_exp,
+    'callexp': call_exp,
+    'paren': paren_exp,
+    '+': plus_exp,
+    '-': minus_exp,
+    '*': times_exp,
+    '/': divide_exp,
+    '%': euclid_exp,
+    '==': eq_exp,
+    '<=': le_exp,
+    '>=': be_exp,
+    '>': bt_exp,
+    '<': lt_exp,
+    'ne': ne_exp,
+    'and': and_exp,
+    'or': or_exp,
+    'uminus': uminus_exp
 }
 
 ###################################################################################################################
+
 
 def interp(input_stream):
     # initialisation de  state object
@@ -897,9 +1011,8 @@ if __name__ == "__main__":
     input_stream = \
         '''
         //da5al lcode dyal hna 
-         
+        kteb('salam world')
         '''
-
 
     # execute interpreter
     interp(input_stream=input_stream)
