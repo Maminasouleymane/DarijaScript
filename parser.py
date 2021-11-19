@@ -1006,13 +1006,14 @@ def interp(input_stream):
     walk(state.AST)
 
 
+def readFromExternalFile():
+    f = open("input.txt", "r")
+    if f.mode == "r":
+        content = f.read()
+    return content
+
+
 if __name__ == "__main__":
-    #
-    input_stream = \
-        '''
-        //da5al lcode dyal hna 
-        kteb('salam world')
-        '''
 
     # execute interpreter
-    interp(input_stream=input_stream)
+    interp(input_stream=readFromExternalFile())

@@ -1,0 +1,5 @@
+sjel_3andk x = 10;
+ma7ad(x >1){
+    kteb('Salam 3alam')
+    x = x -1 
+}
